@@ -1,81 +1,80 @@
-var Chef = require('./chef.js');
-var Customer = require('./customer.js');
-var Server = require('./server.js');
+let Chef = require('./chef.js');
+let Customer = require('./customer.js');
+let Server = require('./server.js');
 
 var restaurant = function(minutes,customernum,tablenum,servernum,chefnum){
     //initialize chef and servers
-    var customers = [], chefs = [],servers = [],tables = [];
+    let customers = [], chefs = [],servers = [],tables = [], earnings = 0;
     initiate(customers, chefs, tables, tablenum, servernum, chefnum);
     //initialize simulation
-    var waitqueue = [],chefqueue = [],event = [];
+    let table_queue = [],chef_queue = [],event = [];
     arrivals(event,minutes,customernum);
-    while(event[0].time<minutes){
-        var curevent = event.shift();
+    while(event.length>0 && event[0].time<minutes){
+        let curevent = event.shift();
         if(curevent.type == "arrival"){
-            waitqueue.push(curevent.customer);
+            //add curevent to end of the table_queue
+            table_queue.push(curevent.customer);
             //check server availability
-            for(var i =0;i<tables.length;i++){
+            for(let i =0;i<tables.length;i++){
                 //if a server is free
-                if(tables[i]==0 && waitqueue.length>0){
-                    var seated = waitqueue.shift()
+                if(tables[i]==0 && table_queue.length>0){
+                    let seated = table_queue.shift()
                     tables[i]=seated;
-                    seated.order = Math.floor(Math.random() * 5);
-                    seated.eattime = Math.floor(Math.random() * 5);
+                    seated.order = Math.floor(Math.random() * 10);
+                    earnings += seated.order;
+                    seated.eattime = Math.floor(Math.random() * 20);
                     seated.table = i;
-                    chefqueue.push(seated);
+                    chef_queue.push(seated);
                 }
             }
-            for(var i =0;i<chefs.length;i++){
-              if(!chefs[i].busy && chefqueue.length>0){
-                 var curorder = chefqueue.shift();
+            for(let i =0;i<chefs.length;i++){
+              if(!chefs[i].busy && chef_queue.length>0){
+                 let curorder = chef_queue.shift();
                  chefs[i].busy = true;
                  event.push({type:"chef-departure", time:curevent.time+curorder.order, customer: curorder, chef:i});
-                 console.log("55"+i);
               }
             }
         }
         else if(curevent.type == "chef-departure"){
-          console.log(curevent.chef);
             chefs[curevent.chef].busy = false;
             event.push({type:"departure", time:curevent.time+curevent.customer.eattime, customer: curevent.customer})
-            if(chefqueue.length>0){
-               var curorder = chefqueue.shift();
+            if(chef_queue.length>0){
+               let curorder = chef_queue.shift();
                chefs[curevent.chef].busy = true;
                event.push({type:"chef-departure", time:curevent.time+curorder.order, customer: curorder, chef:curevent.chef});
-               console.log("68"+curevent.chef);
             }
         }
         else if(curevent.type == "departure"){
             tables[curevent.customer.table]=0;
-            if(waitqueue.length>0){
-              var seated = waitqueue.shift()
-              tables[i]=seated;
-              seated.order = Math.floor(Math.random() * 5);
-              seated.eattime = Math.floor(Math.random() * 5);
-              seated.table = i;
-              chefqueue.push(seated);
-              for(var i =0;i<chefs.length;i++){
-                if(!chefs[i].busy && chefqueue.length>0){
-                   var curorder = chefqueue.shift();
+            if(table_queue.length>0){
+              let seated = table_queue.shift()
+              tables[curevent.customer.table]=seated;
+              seated.order = Math.floor(Math.random() * 10);
+              earnings += seated.order;
+              seated.eattime = Math.floor(Math.random() * 20);
+              seated.table = curevent.customer.table;
+              //Check if a chef can
+              chef_queue.push(seated);
+              for(let i =0;i<chefs.length;i++){
+                if(!chefs[i].busy && chef_queue.length>0){
+                   let curorder = chef_queue.shift();
                    chefs[i].busy = true;
                    event.push({type:"chef-departure", time:curevent.time+curorder.order, customer: curorder, chef:i});
-                   console.log("84"+i);
                 }
               }
             }
-            customers.push({start: curevent.customer.arrival, departure:curevent.time});
+            curevent.customer.departure = curevent.time;
+            customers.push(curevent.customer);
         }
         event.sort((a,b) => {return a.time - b.time});
-        if(event.length==0){
-          break;
-        }
     }
+    console.log(customers,earnings);
 };
 var arrivals = function(event,minutes,customernum){
-  var curtime = 0;
+  let curtime = 0;
   while(curtime<customernum){
-    var nextArrivalTime = Math.floor(random_normal()*100);
-    var nextArrival = {type:"arrival", time:nextArrivalTime, customer: new Customer(nextArrivalTime)};
+    let nextArrivalTime = Math.floor(random_normal()*minutes);
+    let nextArrival = {type:"arrival", time:nextArrivalTime, customer: new Customer(nextArrivalTime)};
     event.push(nextArrival);
     curtime++;
   }
@@ -83,14 +82,14 @@ var arrivals = function(event,minutes,customernum){
   console.log(event);
 };
 var random_normal = function(){
-    var u = 0, v = 0;
+    let u = 0, v = 0;
     while(u === 0){
       u = Math.random();
     }
     while(v === 0){
       v = Math.random();
     }
-    var normal = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    let normal = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
     normal = normal / 10.0 + 0.5;
     if (normal > 1 || normal < 0){
       return random_normal();
@@ -98,14 +97,14 @@ var random_normal = function(){
     return normal;
 }
 var initiate = function(servers, chefs, tables, tablenum, servernum, chefnum){
-    for(var i =0; i<chefnum; i++){
+    for(let i =0; i<chefnum; i++){
       chefs[i] = new Chef(i);
     }
-    for(var i =0; i<servernum; i++){
+    for(let i =0; i<servernum; i++){
       servers[i] = new Server(i);
     }
-    for(var i =0; i<tablenum; i++){
+    for(let i =0; i<tablenum; i++){
       tables[i] = 0;
     }
 }
-restaurant(100,30,10,2,2);
+restaurant(480,100,10,2,2);
