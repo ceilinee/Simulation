@@ -183,26 +183,36 @@ var excel_export = function(customers){
     font: {
       color: '#FF0800',
       size: 12
-    },
-    numberFormat: '$#,##0.00; ($#,##0.00); -'
+    }
   });
+  worksheet.cell(1,1).string("ID").style(style);
+  worksheet.cell(1,2).string("Arrival").style(style);
+  worksheet.cell(1,3).string("Wait_for_table").style(style);
+  worksheet.cell(1,4).string("Wait_for_dish").style(style);
+  worksheet.cell(1,5).string("Time_to_eat").style(style);
+  worksheet.cell(1,6).string("Finish_meal").style(style);
+  worksheet.cell(1,7).string("Departure").style(style);
+  worksheet.cell(1,8).string("Order_name").style(style);
+  worksheet.cell(1,9).string("Order_prep_time").style(style);
+  worksheet.cell(1,10).string("Chef").style(style);
+  worksheet.cell(1,11).string("Tables").style(style);
   for(let i =0; i<customers.length;i++){
-      worksheet.cell(i+1,1).number(i+1).style(style);
-      worksheet.cell(i+1,2).number(customers[i].arrival).style(style);
-      worksheet.cell(i+1,3).number(customers[i].wait_for_table).style(style);
-      worksheet.cell(i+1,4).number(customers[i].wait_for_dish).style(style);
-      worksheet.cell(i+1,5).number(customers[i].time_to_eat).style(style);
-      worksheet.cell(i+1,6).number(customers[i].finish_meal).style(style);
-      worksheet.cell(i+1,7).number(customers[i].departure).style(style);
-      worksheet.cell(i+1,8).string(customers[i].order_name).style(style);
-      worksheet.cell(i+1,9).number(customers[i].order_prep_time).style(style);
-      worksheet.cell(i+1,10).number(customers[i].chef).style(style);
-      worksheet.cell(i+1,11).number(customers[i].table).style(style);
+      worksheet.cell(i+2,1).number(i+1).style(style);
+      worksheet.cell(i+2,2).number(customers[i].arrival).style(style);
+      worksheet.cell(i+2,3).number(customers[i].wait_for_table).style(style);
+      worksheet.cell(i+2,4).number(customers[i].wait_for_dish).style(style);
+      worksheet.cell(i+2,5).number(customers[i].time_to_eat).style(style);
+      worksheet.cell(i+2,6).number(customers[i].finish_meal).style(style);
+      worksheet.cell(i+2,7).number(customers[i].departure).style(style);
+      worksheet.cell(i+2,8).string(customers[i].order_name).style(style);
+      worksheet.cell(i+2,9).number(customers[i].order_prep_time).style(style);
+      worksheet.cell(i+2,10).number(customers[i].chef).style(style);
+      worksheet.cell(i+2,11).number(customers[i].table).style(style);
   }
   workbook.write('newexcel.xlsx');
 }
 var orderGenerater = function(){
-    let menu = [{'Beef':10},{'Chicken':13},{'Fish':15},{'Lamb':10},{'Prawns':13},{'Vegetables':8}];
+    let menu = [{'Beef':5},{'Chicken':7},{'Fish':8},{'Lamb':5},{'Prawns':7},{'Vegetables':4}];
     let random = Math.random();
     if(random<0.3){
         return menu[0];
@@ -295,4 +305,5 @@ var initiate = function(chefs, tables,two_tables,four_tables,six_tables,tablenum
         id++;
     }
 }
-restaurant(600,200,[8,8,4],2);
+restaurant(400,150,[8,8,4],8);
+//sim time, max customers, [two seat tables, 4 seat tables, 6 seat tables], chefs
