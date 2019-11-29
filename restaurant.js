@@ -7,83 +7,24 @@ var restaurant = function(minutes,customernum,tablenum,chefnum){
     //initialize chef and servers
     let customers = [], chefs = [],tables=[],two_tables = [], four_tables = [], six_tables = [], earnings = 0;
     initiate(chefs, tables,two_tables,four_tables,six_tables, tablenum, chefnum);
-    //initialize simulation
     let two_table_queue = [],four_table_queue = [],six_table_queue = [],chef_queue = [],event = [];
     arrivals(event,minutes,customernum);
     while(event.length>0 && event[0].time<minutes){
         let curevent = event.shift();
         if(curevent.type == "arrival"){
             //add curevent to end of the table_queue
-            if(curevent.customer.length<=2){
-                two_table_queue.push(curevent.customer);
-                for(let i =0; i<two_tables.length; i++){
-                     if(two_tables[i].empty == true && two_table_queue.length>0){
-                          cur_party = two_table_queue.shift();
-                          two_tables[i].empty = false;
-                          two_tables[i].customer = cur_party;
-                          for(let j = 0; j<cur_party.length; j++){
-                                let order = orderGenerater();
-                                cur_party[j].order_name = Object.keys(order)[0];
-                                cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                                earnings += cur_party[j].order_prep_time;
-                                cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
-                                cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
-                                cur_party[j].table = two_tables[i].id;
-                                chef_queue.push(cur_party[j]);
-                          }
-                     }
-                }
-            }
-            //check server availability
-            else if(curevent.customer.length<=4 && curevent.customer.length>2){
-                four_table_queue.push(curevent.customer);
-                for(let i =0; i<four_tables.length; i++){
-                     if(four_tables[i].empty && four_table_queue.length>0){
-                          cur_party = four_table_queue.shift();
-                          four_tables[i].empty = false;
-                          four_tables[i].customer = cur_party;
-                          for(let j = 0; j<cur_party.length; j++){
-                                let order = orderGenerater();
-                                cur_party[j].order_name = Object.keys(order)[0];
-                                cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                                earnings += cur_party[j].order_prep_time;
-                                cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
-                                cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
-                                cur_party[j].table = four_tables[i].id;
-                                chef_queue.push(cur_party[j]);
-                          }
-                     }
-                }
+            let queue = two_table_queue;
+            let tables_array = two_tables;
+            if(curevent.customer.length<=4 && curevent.customer.length>2){
+                queue = four_table_queue;
+                tables_array = four_tables;
             }
             else if(curevent.customer.length<=6 && curevent.customer.length>4){
-                six_table_queue.push(curevent.customer);
-                for(let i =0; i<six_tables.length; i++){
-                     if(six_tables[i].empty && six_table_queue.length>0){
-                          cur_party = six_table_queue.shift();
-                          six_tables[i].empty = false;
-                          six_tables[i].customer = cur_party;
-                          for(let j = 0; j<cur_party.length; j++){
-                                let order = orderGenerater();
-                                cur_party[j].order_name = Object.keys(order)[0];
-                                cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                                earnings += cur_party[j].order_prep_time;
-                                cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
-                                cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
-                                cur_party[j].table = six_tables[i].id;
-                                chef_queue.push(cur_party[j]);
-                          }
-                     }
-                }
+                queue = six_table_queue;
+                tables_array = six_tables;
             }
-            for(let i =0;i<chefs.length;i++){
-              if(!chefs[i].busy && chef_queue.length>0){
-                 let curorder = chef_queue.shift();
-                 chefs[i].busy = true;
-                 curorder.chef = chefs[i].id;
-                 curorder.order_prep_time = curorder.order_prep_time*chefs[curorder.chef].inexperience;
-                 event.push({type:"dish-complete", time:curevent.time+curorder.order_prep_time, customer: curorder, chef:i});
-              }
-            }
+            seat_customer(curevent, queue,tables_array,'NULL',chef_queue);
+            assign_chef(curevent,chef_queue,chefs,event);
         }
         else if(curevent.type == "dish-complete"){
             chefs[curevent.chef].busy = false;
@@ -115,60 +56,15 @@ var restaurant = function(minutes,customernum,tablenum,chefnum){
                 }
                 tables[curevent.customer.table].customer = [];
                 tables[curevent.customer.table].empty = true;
-                if(tables[curevent.customer.table].seats==2 && two_table_queue.length>0){
-                              cur_party = two_table_queue.shift();
-                              tables[curevent.customer.table].empty = false;
-                              tables[curevent.customer.table].customer = cur_party;
-                              for(let j = 0; j<cur_party.length; j++){
-                                    let order = orderGenerater();
-                                    cur_party[j].order_name = Object.keys(order)[0];
-                                    cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                                    earnings += cur_party[j].order_prep_time;
-                                    cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
-                                    cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
-                                    cur_party[j].table = tables[curevent.customer.table].id;
-                                    chef_queue.push(cur_party[j]);
-                              }
+                let queue = two_table_queue;
+                if(tables[curevent.customer.table].seats==4){
+                    queue = four_table_queue;
                 }
-                if(tables[curevent.customer.table].seats==4 && four_table_queue.length>0){
-                              cur_party = four_table_queue.shift();
-                              tables[curevent.customer.table].empty = false;
-                              tables[curevent.customer.table].customer = cur_party;
-                              for(let j = 0; j<cur_party.length; j++){
-                                    let order = orderGenerater();
-                                    cur_party[j].order_name = Object.keys(order)[0];
-                                    cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                                    earnings += cur_party[j].order_prep_time;
-                                    cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
-                                    cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
-                                    cur_party[j].table = tables[curevent.customer.table].id;
-                                    chef_queue.push(cur_party[j]);
-                              }
+                else if(tables[curevent.customer.table].seats==6){
+                    queue = six_table_queue;
                 }
-                if(tables[curevent.customer.table].seats==6 && six_table_queue.length>0){
-                              cur_party = six_table_queue.shift();
-                              tables[curevent.customer.table].empty = false;
-                              tables[curevent.customer.table].customer = cur_party;
-                              for(let j = 0; j<cur_party.length; j++){
-                                    let order = orderGenerater();
-                                    cur_party[j].order_name = Object.keys(order)[0];
-                                    cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                                    earnings += cur_party[j].order_prep_time;
-                                    cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
-                                    cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
-                                    cur_party[j].table = tables[curevent.customer.table].id;
-                                    chef_queue.push(cur_party[j]);
-                              }
-                }
-                for(let i =0;i<chefs.length;i++){
-                  if(!chefs[i].busy && chef_queue.length>0){
-                     let curorder = chef_queue.shift();
-                     chefs[i].busy = true;
-                     curorder.chef = chefs[i].id;
-                     curorder.order_prep_time = curorder.order_prep_time*chefs[curorder.chef].inexperience;
-                     event.push({type:"dish-complete", time:curevent.time+curorder.order_prep_time, customer: curorder, chef:i});
-                  }
-                }
+                seat_customer(curevent, queue,tables,curevent.customer.table,chef_queue);
+                assign_chef(curevent,chef_queue,chefs,event);
             }
         }
         event.sort((a,b) => {return a.time - b.time});
@@ -176,6 +72,56 @@ var restaurant = function(minutes,customernum,tablenum,chefnum){
     // console.log(customers,earnings);
     excel_export(customers);
 };
+var assign_chef = function(curevent,chef_queue,chefs,event){
+  for(let i =0;i<chefs.length;i++){
+    if(!chefs[i].busy && chef_queue.length>0){
+       let curorder = chef_queue.shift();
+       chefs[i].busy = true;
+       curorder.chef = chefs[i].id;
+       curorder.order_prep_time = curorder.order_prep_time*chefs[curorder.chef].inexperience;
+       event.push({type:"dish-complete", time:curevent.time+curorder.order_prep_time, customer: curorder, chef:i});
+    }
+  }
+}
+var seat_customer = function(curevent, queue,tables_array,know_table,chef_queue){
+  queue.push(curevent.customer);
+  if(know_table == 'NULL'){
+    console.log("NULL");
+    for(let i =0; i<tables_array.length; i++){
+         if(tables_array[i].empty && queue.length>0){
+              cur_party = queue.shift();
+              tables_array[i].empty = false;
+              tables_array[i].customer = cur_party;
+              for(let j = 0; j<cur_party.length; j++){
+                    let order = orderGenerater();
+                    console.log(Object.keys(order));
+                    cur_party[j].order_name = Object.keys(order)[0];
+                    cur_party[j].order_prep_time = order[Object.keys(order)[0]];
+                    cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
+                    cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
+                    cur_party[j].table = tables_array[i].id;
+                    chef_queue.push(cur_party[j]);
+              }
+         }
+      }
+  }
+  else{
+      if(queue.length>0){
+           cur_party = queue.shift();
+           tables_array[know_table].empty = false;
+           tables_array[know_table].customer = cur_party;
+           for(let j = 0; j<cur_party.length; j++){
+                 let order = orderGenerater();
+                 cur_party[j].order_name = Object.keys(order)[0];
+                 cur_party[j].order_prep_time = order[Object.keys(order)[0]];
+                 cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
+                 cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
+                 cur_party[j].table = tables_array[know_table].id;
+                 chef_queue.push(cur_party[j]);
+           }
+      }
+  }
+}
 var excel_export = function(customers){
   let workbook = new Excel.Workbook();
   let worksheet = workbook.addWorksheet('Sheet 1');
@@ -214,6 +160,7 @@ var excel_export = function(customers){
 var orderGenerater = function(){
     let menu = [{'Beef':5},{'Chicken':7},{'Fish':8},{'Lamb':5},{'Prawns':7},{'Vegetables':4}];
     let random = Math.random();
+    let serve_time = Math.random();
     if(random<0.3){
         return menu[0];
     }
@@ -305,5 +252,5 @@ var initiate = function(chefs, tables,two_tables,four_tables,six_tables,tablenum
         id++;
     }
 }
-restaurant(400,150,[8,8,4],8);
+restaurant(400,150,[8,8,4],2);
 //sim time, max customers, [two seat tables, 4 seat tables, 6 seat tables], chefs
