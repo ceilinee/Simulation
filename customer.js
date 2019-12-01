@@ -1,4 +1,4 @@
-var Customer = function (arrival) {
+var Customer = function (arrival,group) {
   this.arrival=arrival;
   this.wait_for_table=0;
   this.wait_for_dish=0;
@@ -8,6 +8,7 @@ var Customer = function (arrival) {
   this.order_name='';
   this.order_prep_time=0;
   this.chef=null;
+  this.group=group;
   this.table=null;
 };
 

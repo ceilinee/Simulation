@@ -166,28 +166,30 @@ var excel_export = function(customers){
     }
   });
   worksheet.cell(1,1).string("ID").style(style);
-  worksheet.cell(1,2).string("Arrival").style(style);
-  worksheet.cell(1,3).string("Wait_for_table").style(style);
-  worksheet.cell(1,4).string("Wait_for_dish").style(style);
-  worksheet.cell(1,5).string("Time_to_eat").style(style);
-  worksheet.cell(1,6).string("Finish_meal").style(style);
-  worksheet.cell(1,7).string("Departure").style(style);
-  worksheet.cell(1,8).string("Order_name").style(style);
-  worksheet.cell(1,9).string("Order_prep_time").style(style);
-  worksheet.cell(1,10).string("Chef").style(style);
-  worksheet.cell(1,11).string("Tables").style(style);
+  worksheet.cell(1,2).string("Group_ID").style(style);
+  worksheet.cell(1,3).string("Arrival").style(style);
+  worksheet.cell(1,4).string("Wait_for_table").style(style);
+  worksheet.cell(1,5).string("Wait_for_dish").style(style);
+  worksheet.cell(1,6).string("Time_to_eat").style(style);
+  worksheet.cell(1,7).string("Finish_meal").style(style);
+  worksheet.cell(1,8).string("Departure").style(style);
+  worksheet.cell(1,9).string("Order_name").style(style);
+  worksheet.cell(1,10).string("Order_prep_time").style(style);
+  worksheet.cell(1,11).string("Chef").style(style);
+  worksheet.cell(1,12).string("Tables").style(style);
   for(let i =0; i<customers.length;i++){
       worksheet.cell(i+2,1).number(i+1).style(style);
-      worksheet.cell(i+2,2).number(customers[i].arrival).style(style);
-      worksheet.cell(i+2,3).number(customers[i].wait_for_table).style(style);
-      worksheet.cell(i+2,4).number(customers[i].wait_for_dish).style(style);
-      worksheet.cell(i+2,5).number(customers[i].time_to_eat).style(style);
-      worksheet.cell(i+2,6).number(customers[i].finish_meal).style(style);
-      worksheet.cell(i+2,7).number(customers[i].departure).style(style);
-      worksheet.cell(i+2,8).string(customers[i].order_name).style(style);
-      worksheet.cell(i+2,9).number(customers[i].order_prep_time).style(style);
-      worksheet.cell(i+2,10).number(customers[i].chef).style(style);
-      worksheet.cell(i+2,11).number(customers[i].table).style(style);
+      worksheet.cell(i+2,2).number(customers[i].group).style(style);
+      worksheet.cell(i+2,3).number(customers[i].arrival).style(style);
+      worksheet.cell(i+2,4).number(customers[i].wait_for_table).style(style);
+      worksheet.cell(i+2,5).number(customers[i].wait_for_dish).style(style);
+      worksheet.cell(i+2,6).number(customers[i].time_to_eat).style(style);
+      worksheet.cell(i+2,7).number(customers[i].finish_meal).style(style);
+      worksheet.cell(i+2,8).number(customers[i].departure).style(style);
+      worksheet.cell(i+2,9).string(customers[i].order_name).style(style);
+      worksheet.cell(i+2,10).number(customers[i].order_prep_time).style(style);
+      worksheet.cell(i+2,11).number(customers[i].chef).style(style);
+      worksheet.cell(i+2,12).number(customers[i].table).style(style);
   }
   workbook.write('newexcel.xlsx');
 }
@@ -218,16 +220,18 @@ var orderGenerater = function(){
 var arrivals = function(event,minutes,customernum){
     //Generate arrivals
     let curtime = 0;
+    let group = 0;
     //While there are fewer customers than defined
     while(curtime<customernum){
         //Generate an arrival time, based on the normal distrirbution
+        group++;
         let nextArrivalTime = Math.floor(random_normal()*minutes);
         //Generate size of the party
         let randomArrival = random_arrival_count();
         let customer = [];
         //Initiate an new instance of the Customer class until the party is the size of randomArrival
         for(let i = 0; i<randomArrival; i++){
-            customer[i] = new Customer(nextArrivalTime);
+            customer[i] = new Customer(nextArrivalTime, group);
         }
         //Add arrival to queue
         let nextArrival = {type:"arrival", time:nextArrivalTime, customer: customer};
