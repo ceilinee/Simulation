@@ -66,7 +66,6 @@ var restaurant = function(minutes,customernum,tablenum,chefnum){
                 //update departure time for all, add to output
                 for(let i = 0; i<tables[curevent.customer.table].customer.length; i++){
                     tables[curevent.customer.table].customer[i].departure=curevent.time;
-                    customers.push(tables[curevent.customer.table].customer[i]);
                 }
                 //update table state
                 tables[curevent.customer.table].customer = [];
@@ -122,7 +121,7 @@ var seat_customer = function(curevent, queue,tables_array,know_table,chef_queue)
                     //Update customer data
                     cur_party[j].order_name = Object.keys(order)[0];
                     cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                    cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
+                    cur_party[j].time_to_eat = Math.floor(Math.random() * 10)+10;
                     cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
                     cur_party[j].table = tables_array[i].id;
                     //Save order to chef_queue
@@ -146,7 +145,7 @@ var seat_customer = function(curevent, queue,tables_array,know_table,chef_queue)
                  //Update customer data
                  cur_party[j].order_name = Object.keys(order)[0];
                  cur_party[j].order_prep_time = order[Object.keys(order)[0]];
-                 cur_party[j].time_to_eat = Math.floor(Math.random() * 20);
+                 cur_party[j].time_to_eat = Math.floor(Math.random() * 10)+10;
                  cur_party[j].wait_for_table = curevent.time-cur_party[j].arrival;
                  cur_party[j].table = tables_array[know_table].id;
                  //Save order to chef_queue
@@ -303,5 +302,5 @@ var initiate = function(chefs, tables,two_tables,four_tables,six_tables,tablenum
     }
 }
 //Call restaurarnt function
-restaurant(400,150,[8,8,4],2);
+restaurant(400,150,[4,4,2],2);
 //function parameters (in order): sim time, max customers, [two seat tables, 4 seat tables, 6 seat tables], chefs

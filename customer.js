@@ -1,6 +1,6 @@
 var Customer = function (arrival,group) {
   this.arrival=arrival;
-  this.wait_for_table=0;
+  this.wait_for_table=null;
   this.wait_for_dish=0;
   this.time_to_eat=0;
   this.finish_meal=0;
