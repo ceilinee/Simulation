@@ -64,8 +64,10 @@ var restaurant = function(minutes,customernum,tablenum,chefnum){
             //if all are done
             if(finish){
                 //update departure time for all, add to output
+                console.log(curevent.time, two_table_queue.length,four_table_queue.length,six_table_queue.length,chef_queue.length);
                 for(let i = 0; i<tables[curevent.customer.table].customer.length; i++){
                     tables[curevent.customer.table].customer[i].departure=curevent.time;
+                    customers.push(tables[curevent.customer.table].customer[i]);
                 }
                 //update table state
                 tables[curevent.customer.table].customer = [];
@@ -176,6 +178,7 @@ var excel_export = function(customers){
   worksheet.cell(1,10).string("Order_prep_time").style(style);
   worksheet.cell(1,11).string("Chef").style(style);
   worksheet.cell(1,12).string("Tables").style(style);
+  // console.log(customers);
   for(let i =0; i<customers.length;i++){
       worksheet.cell(i+2,1).number(i+1).style(style);
       worksheet.cell(i+2,2).number(customers[i].group).style(style);
@@ -227,6 +230,9 @@ var arrivals = function(event,minutes,customernum){
         let nextArrivalTime = Math.floor(random_normal()*minutes);
         //Generate size of the party
         let randomArrival = random_arrival_count();
+        while(curtime+randomArrival>customernum){
+          randomArrival = random_arrival_count();
+        }
         let customer = [];
         //Initiate an new instance of the Customer class until the party is the size of randomArrival
         for(let i = 0; i<randomArrival; i++){
@@ -302,5 +308,5 @@ var initiate = function(chefs, tables,two_tables,four_tables,six_tables,tablenum
     }
 }
 //Call restaurarnt function
-restaurant(400,150,[4,4,2],2);
+restaurant(400,150,[4,4,2],3);
 //function parameters (in order): sim time, max customers, [two seat tables, 4 seat tables, 6 seat tables], chefs
