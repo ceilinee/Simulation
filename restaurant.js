@@ -159,7 +159,7 @@ var seat_customer = function(curevent, queue,tables_array,know_table,chef_queue)
 var excel_export = function(customers){
   //Save all output to an excel file
   let workbook = new Excel.Workbook();
-  let worksheet = workbook.addWorksheet('Sheet 1');
+  let worksheet = workbook.addWorksheet('Simulation');
   var style = workbook.createStyle({
     font: {
       color: '#FF0800',
@@ -178,7 +178,6 @@ var excel_export = function(customers){
   worksheet.cell(1,10).string("Order_prep_time").style(style);
   worksheet.cell(1,11).string("Chef").style(style);
   worksheet.cell(1,12).string("Tables").style(style);
-  // console.log(customers);
   for(let i =0; i<customers.length;i++){
       worksheet.cell(i+2,1).number(i+1).style(style);
       worksheet.cell(i+2,2).number(customers[i].group).style(style);
@@ -193,7 +192,7 @@ var excel_export = function(customers){
       worksheet.cell(i+2,11).number(customers[i].chef).style(style);
       worksheet.cell(i+2,12).number(customers[i].table).style(style);
   }
-  workbook.write('newexcel.xlsx');
+  workbook.write('MSCI333-Restaurant.xlsx');
 }
 var orderGenerater = function(){
     //Generate a rrarndom order based on our research of order probability
