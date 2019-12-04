@@ -308,5 +308,5 @@ var initiate = function(chefs, tables,two_tables,four_tables,six_tables,tablenum
     }
 }
 //Call restaurarnt function
-restaurant(400,150,[4,4,2],3);
+restaurant(400,150,[4,4,2],4);
 //function parameters (in order): sim time, max customers, [two seat tables, 4 seat tables, 6 seat tables], chefs
